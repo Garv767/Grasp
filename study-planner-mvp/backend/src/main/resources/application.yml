@@ -1,0 +1,89 @@
+# AI-Backed Study Planner - Application Configuration
+# MVP Version 1.0.0
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: study-planner-backend
+  
+  # Database Configuration
+  datasource:
+    url: jdbc:mysql://localhost:3306/study_planner_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:study_user}
+    password: ${DB_PASSWORD:study_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  # JPA/Hibernate Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update # Use 'create' for first run, 'update' for production
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        use_sql_comments: true
+  
+  # Thymeleaf Configuration
+  thymeleaf:
+    mode: HTML
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+    cache: false # Disable cache in development
+  
+  # Security Configuration
+  security:
+    jwt:
+      secret: ${JWT_SECRET:mySecretKey}
+      expiration: 86400000 # 24 hours in milliseconds
+
+# Custom Application Properties
+app:
+  ml-service:
+    base-url: ${ML_SERVICE_URL:http://localhost:5000}
+    endpoints:
+      recommendations: /api/v1/recommendations
+      model-train: /api/v1/train
+  
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:8080}
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: "*"
+  
+  file:
+    upload-dir: uploads/
+
+# Logging Configuration
+logging:
+  level:
+    com.studyplanner: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/study-planner.log
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+# Management/Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
