@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: grasp-postgres
+    environment:
+      POSTGRES_DB: grasp_db
+      POSTGRES_USER: grasp_user
+      POSTGRES_PASSWORD: grasp_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/1_schema.sql
+      - ./database/seed-data.sql:/docker-entrypoint-initdb.d/2_seed.sql
+    networks:
+      - grasp-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+    container_name: grasp-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/grasp_db
+      SPRING_DATASOURCE_USERNAME: grasp_user
+      SPRING_DATASOURCE_PASSWORD: grasp_password
+    depends_on:
+      - postgres
+    networks:
+      - grasp-network
+
+volumes:
+  postgres_data:
+
+networks:
+  grasp-network:
+    driver: bridge
